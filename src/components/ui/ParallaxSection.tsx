@@ -23,27 +23,37 @@ const ParallaxSection = ({
   const [offset, setOffset] = useState(0);
 
   useEffect(() => {
-    const handleScroll = () => {
+    // Function to calculate parallax effect
+    const calculateParallax = () => {
       if (!sectionRef.current) return;
 
-      const { top } = sectionRef.current.getBoundingClientRect();
+      const { top, height } = sectionRef.current.getBoundingClientRect();
       const windowHeight = window.innerHeight;
-      const sectionHeight = sectionRef.current.offsetHeight;
       
       // Calculate how far the section is from the center of the viewport
-      const distanceFromCenter = (top + sectionHeight / 2) - (windowHeight / 2);
+      // This gives a more natural parallax that's sensitive to the section's position
+      const viewportMiddle = windowHeight / 2;
+      const sectionMiddle = top + height / 2;
+      const distanceFromCenter = sectionMiddle - viewportMiddle;
       
-      // Calculate the parallax offset based on distance from center
+      // Calculate the parallax offset - adjust for smoother effect
       const newOffset = -(distanceFromCenter * intensity);
       
       setOffset(newOffset);
     };
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll(); // Initial calculation
+    // Add scroll listener for smoother updates
+    window.addEventListener("scroll", calculateParallax, { passive: true });
+    
+    // Add resize listener to recalculate on window resize
+    window.addEventListener("resize", calculateParallax, { passive: true });
+    
+    // Call once on mount
+    calculateParallax();
 
     return () => {
-      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("scroll", calculateParallax);
+      window.removeEventListener("resize", calculateParallax);
     };
   }, [intensity]);
 
@@ -53,9 +63,11 @@ const ParallaxSection = ({
         transform: `translateY(${offset}px)`,
         backgroundSize: "cover",
         backgroundPosition: "center",
+        transition: "transform 0.01s linear", // Smoother transition
       }
     : {
         transform: `translateY(${offset}px)`,
+        transition: "transform 0.01s linear", // Smoother transition
       };
 
   return (
@@ -68,7 +80,7 @@ const ParallaxSection = ({
       )}
     >
       <div
-        className={cn("absolute inset-0 -z-10 transition-transform duration-[50ms]", !imageUrl && gradient)}
+        className={cn("absolute inset-0 -z-10", !imageUrl && gradient)}
         style={backgroundStyle}
       />
       <div className="container-tight relative z-10">{children}</div>

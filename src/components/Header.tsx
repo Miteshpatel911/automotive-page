@@ -7,13 +7,18 @@ import { Play, ChevronDown } from "lucide-react";
 
 const Header = () => {
   const [scrolled, setScrolled] = useState(false);
+  const [offset, setOffset] = useState(0);
 
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
+      
+      // Calculate parallax effect for the hero section
+      const scrollY = window.scrollY;
+      setOffset(scrollY * 0.15); // Adjust the multiplier to control parallax intensity
     };
 
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -46,15 +51,27 @@ const Header = () => {
       </header>
 
       <section className="relative h-screen flex items-center pt-16 overflow-hidden">
-        {/* Background Video/Image */}
+        {/* Background with smooth parallax effect */}
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-gradient-overlay z-10" />
+          
+          {/* Image background with parallax effect */}
+          <div 
+            className="absolute inset-0 bg-cover bg-center"
+            style={{
+              backgroundImage: "url('https://images.unsplash.com/photo-1617396900799-f4ec2b43c7ae?q=80&w=2070&auto=format&fit=crop')",
+              transform: `translateY(${offset}px)`,
+              transition: "transform 0.01s linear"
+            }}
+          />
+          
+          {/* Video overlay */}
           <video
             autoPlay
             muted
             loop
             playsInline
-            className="absolute inset-0 object-cover w-full h-full"
+            className="absolute inset-0 object-cover w-full h-full opacity-70"
           >
             <source src="https://assets.mixkit.co/videos/preview/mixkit-man-looking-at-his-virtual-reality-headset-27016-large.mp4" type="video/mp4" />
           </video>
@@ -92,7 +109,7 @@ const Header = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.8 }}
-            className="flex flex-col sm:flex-row justify-center gap-4 mb-12"
+            className="flex flex-col sm:flex-row justify-center gap-4 mb-20"
           >
             <GradientButton size="lg">
               Request a Demo
@@ -108,7 +125,10 @@ const Header = () => {
             transition={{ duration: 0.6, delay: 1.2 }}
             className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-pulse-subtle"
           >
-            <a href="#benefits" className="flex flex-col items-center text-sm text-muted-foreground hover:text-white transition-colors">
+            <a 
+              href="#benefits" 
+              className="flex flex-col items-center text-sm text-muted-foreground hover:text-white transition-colors p-2 rounded-full bg-black/30 backdrop-blur-sm"
+            >
               <span className="mb-2">Scroll to explore</span>
               <ChevronDown className="w-5 h-5" />
             </a>
